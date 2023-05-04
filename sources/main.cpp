@@ -1,23 +1,20 @@
-#include <SFML/Graphics.hpp>
+#include "pch.h"
+#include "pchSFML.h"
+#include "mainwindow.h"
+#include "logger.h"
+
+#define WIDTH (800)
+#define HEIGHT (600)
 
 int main(int argc, char **argv)
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    sfte::Main_window main_win(false);
 
-    while (window.isOpen())
+    while (main_win.is_open())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+        main_win.poll_events();
 
-        window.clear();
-        window.draw(shape);
-        window.display();
+        main_win.display();
     }
 
     return 0;
