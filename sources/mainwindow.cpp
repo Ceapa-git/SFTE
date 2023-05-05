@@ -52,7 +52,7 @@ namespace sfte
             this->size_normal = this->window.getSize();
             this->position_normal = this->window.getPosition();
 
-            this->size_maximized = sf::Vector2u(1920, 1020);
+            this->size_maximized = sf::Vector2u(1920, 1032);
             this->position_maximized = sf::Vector2i(0, 0);
 
             this->window_state = WINDOW_NORMAL;
@@ -172,9 +172,7 @@ namespace sfte
                 if (event.key.code == sf::Keyboard::Key::F4 && event.key.alt)
                     this->window.close();
                 else if (event.key.code == sf::Keyboard::Key::F12)
-                {
                     this->set_state();
-                }
             }
         }
     }
