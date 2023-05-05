@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    sfte::Main_window main_win(false);
+    sfte::Main_window main_win;
 
     while (main_win.is_open())
     {

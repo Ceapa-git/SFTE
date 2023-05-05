@@ -16,10 +16,10 @@ namespace sfte
     class Main_window
     {
     public:
-        Main_window() = delete;
+        Main_window() : Main_window(800, 600, "Simple Fast Text Editor"){};
         Main_window(const Main_window &other) = delete;
-        ~Main_window(){};
-        explicit Main_window(bool from_file, unsigned int width = 800, unsigned int heigth = 600, std::string title = "Simple Fast Text Editor");
+        ~Main_window();
+        explicit Main_window(unsigned int width, unsigned int heigth, std::string title);
 
         bool is_open();
         void poll_events();
@@ -29,14 +29,14 @@ namespace sfte
 
     private:
         sf::RenderWindow window;
+        std::string title;
         sf::Vector2u size;
         sf::Vector2i position;
 
-        std::string title;
         cge::data::Data_file data;
 
     private:
-        bool try_from_file();//TODO: broken
+        bool try_from_file(); // TODO: broken
     };
 }
 
