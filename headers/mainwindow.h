@@ -11,20 +11,17 @@ namespace sfte
     {
         MAXIMIZE,
         NORMAL,
-        FULLSCREEN,
-        KEEP // only for set state
+        FULLSCREEN
     } window_state;
     class Main_window
     {
     public:
         Main_window() = delete;
         Main_window(const Main_window &other) = delete;
-        ~Main_window();
-        explicit Main_window(bool from_file = true, unsigned int width = 800, unsigned int heigth = 600, const char *title = "Simple Fast Text Editor");
+        ~Main_window(){};
+        explicit Main_window(bool from_file, unsigned int width = 800, unsigned int heigth = 600, std::string title = "Simple Fast Text Editor");
 
-        void set_state(window_state state = window_state::KEEP);
-
-        bool is_open() const;
+        bool is_open();
         void poll_events();
         // TODO: void add_event_handler with storage of them
 
@@ -34,17 +31,12 @@ namespace sfte
         sf::RenderWindow window;
         sf::Vector2u size;
         sf::Vector2i position;
-        sf::Vector2u size_normal;
-        sf::Vector2i position_normal;
-        sf::Vector2u size_maximized;
-        sf::Vector2i position_maximized;
-        window_state state;
 
-        std::unique_ptr<char[]> title;
+        std::string title;
         cge::data::Data_file data;
 
     private:
-        bool try_from_file();
+        bool try_from_file();//TODO: broken
     };
 }
 

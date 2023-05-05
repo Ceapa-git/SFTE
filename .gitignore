@@ -2,3 +2,4 @@ Makefile
 obj/
 .vscode/
 *.exe
+.sfte/
