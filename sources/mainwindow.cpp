@@ -57,6 +57,12 @@ namespace sfte
 
             this->window_state = WINDOW_NORMAL;
         }
+        // TODO: create title bar
+        this->title_bar_background.setSize(sf::Vector2f(this->size.x, 20.f));
+        this->title_bar_background.setPosition(0.f, 0.f);
+        this->title_bar_background.setFillColor(sf::Color(133, 129, 119));
+        this->title_bar_background.setOutlineThickness(0.f);
+        this->title_bar.push_back(&this->title_bar_background);
     }
     bool Main_window::try_from_file()
     {
@@ -180,6 +186,11 @@ namespace sfte
     void Main_window::display()
     {
         this->window.clear();
+        // TODO: display title bar
+        for (sf::Drawable *&drawable : this->title_bar)
+            this->window.draw(*drawable);
+        for (sf::Drawable &drawable : this->panels)
+            this->window.draw(drawable);
         this->window.display();
     }
 
@@ -202,5 +213,9 @@ namespace sfte
 
         this->size = this->window.getSize();
         this->position = this->window.getPosition();
+
+        sf::Vector2f old_size(this->title_bar_background.getSize());
+        old_size.x = this->size.x;
+        this->title_bar_background.setSize(old_size);
     }
 }

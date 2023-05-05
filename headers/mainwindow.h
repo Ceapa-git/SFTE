@@ -41,10 +41,16 @@ namespace sfte
         sf::Vector2u size_maximized;
         sf::Vector2i position_maximized;
 
+        std::vector<sf::Drawable *> title_bar;
+        sf::RectangleShape title_bar_background;
+
+        // TODO: way to remember smallerwindow details
+        std::vector<sf::Drawable> panels; // * temporary name
+
         int window_state;
 
     private:
-        bool try_from_file(); // TODO: broken
+        bool try_from_file();
     };
 }
 
