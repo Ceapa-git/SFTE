@@ -45,49 +45,18 @@ namespace sfte
         {
             this->window.create(sf::VideoMode(width, heigth), title, sf::Style::None);
             this->title = title;
-            
+
             this->size = this->window.getSize();
             this->position = this->window.getPosition();
 
             this->size_normal = this->window.getSize();
             this->position_normal = this->window.getPosition();
 
-            this->size_maximized = sf::Vector2u(0,0);
-            this->position_maximized = sf::Vector2i(1920,1020);
+            this->size_maximized = sf::Vector2u(1920, 1020);
+            this->position_maximized = sf::Vector2i(0, 0);
+
+            this->window_state = WINDOW_NORMAL;
         }
-        if (!std::filesystem::is_directory(".sfte"))
-            std::filesystem::create_directory(".sfte");
-
-        unsigned char d_content[4];
-
-        this->data.add(this->title.length() + 1, reinterpret_cast<const unsigned char *>(this->title.c_str()));
-
-        ucharp_from_uint(d_content, this->size.x);
-        this->data.add(4, d_content);
-        ucharp_from_uint(d_content, this->size.y);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position.x);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position.y);
-        this->data.add(4, d_content);
-        
-        ucharp_from_uint(d_content, this->size_normal.x);
-        this->data.add(4, d_content);
-        ucharp_from_uint(d_content, this->size_normal.y);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position_normal.x);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position_normal.y);
-        this->data.add(4, d_content);
-
-        ucharp_from_uint(d_content, this->size_maximized.x);
-        this->data.add(4, d_content);
-        ucharp_from_uint(d_content, this->size_maximized.y);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position_maximized.x);
-        this->data.add(4, d_content);
-        ucharp_from_int(d_content, this->position_maximized.y);
-        this->data.add(4, d_content);
     }
     bool Main_window::try_from_file()
     {
@@ -95,8 +64,10 @@ namespace sfte
         load.load(".sfte/editor.bin");
         if (!load.is_valid())
             return false;
-        if (load.get_count() != 13)
+        if (load.get_count() != 14)
             return false;
+
+        std::cout << "Opening local editor config" << std::endl;
 
         int d_size;
         const unsigned char *d_content;
@@ -131,6 +102,9 @@ namespace sfte
         load.get(12, d_size, d_content);
         this->position_maximized.y = int_from_ucharp(d_content);
 
+        load.get(13, d_size, d_content);
+        this->window_state = int_from_ucharp(d_content);
+
         this->window.create(sf::VideoMode(this->size.x, this->size.y), this->title, sf::Style::None);
         this->window.setPosition(this->position);
 
@@ -138,7 +112,46 @@ namespace sfte
     }
     Main_window::~Main_window()
     {
-        this->data.save(".sfte/editor.bin");
+        std::cout << "Closing editor, saving preferences" << std::endl;
+        if (!std::filesystem::is_directory(".sfte"))
+            std::filesystem::create_directory(".sfte");
+
+        unsigned char d_content[4];
+        cge::data::Data_file save;
+
+        save.add(this->title.length() + 1, reinterpret_cast<const unsigned char *>(this->title.c_str()));
+
+        ucharp_from_uint(d_content, this->size.x);
+        save.add(4, d_content);
+        ucharp_from_uint(d_content, this->size.y);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position.x);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position.y);
+        save.add(4, d_content);
+
+        ucharp_from_uint(d_content, this->size_normal.x);
+        save.add(4, d_content);
+        ucharp_from_uint(d_content, this->size_normal.y);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position_normal.x);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position_normal.y);
+        save.add(4, d_content);
+
+        ucharp_from_uint(d_content, this->size_maximized.x);
+        save.add(4, d_content);
+        ucharp_from_uint(d_content, this->size_maximized.y);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position_maximized.x);
+        save.add(4, d_content);
+        ucharp_from_int(d_content, this->position_maximized.y);
+        save.add(4, d_content);
+
+        ucharp_from_int(d_content, this->window_state);
+        save.add(4, d_content);
+        save.save(".sfte/editor.bin");
+        std::cout << "Preferences saved" << std::endl;
     }
 
     bool Main_window::is_open()
@@ -157,8 +170,10 @@ namespace sfte
             else if (event.type == sf::Event::EventType::KeyPressed)
             {
                 if (event.key.code == sf::Keyboard::Key::F4 && event.key.alt)
-                {
                     this->window.close();
+                else if (event.key.code == sf::Keyboard::Key::F12)
+                {
+                    this->set_state();
                 }
             }
         }
@@ -168,5 +183,26 @@ namespace sfte
     {
         this->window.clear();
         this->window.display();
+    }
+
+    void Main_window::set_state(int state)
+    {
+        if (state == this->window_state)
+            return;
+        if (state == WINDOW_NORMAL || (this->window_state == WINDOW_MAXIMIZED && state == WINDOW_SWAP_STATE))
+        {
+            this->window.setSize(this->size_normal);
+            this->window.setPosition(this->position_normal);
+            this->window_state = WINDOW_NORMAL;
+        }
+        else if (state == WINDOW_MAXIMIZED || (this->window_state == WINDOW_NORMAL && state == WINDOW_SWAP_STATE))
+        {
+            this->window.setSize(this->size_maximized);
+            this->window.setPosition(this->position_maximized);
+            this->window_state = WINDOW_MAXIMIZED;
+        }
+
+        this->size = this->window.getSize();
+        this->position = this->window.getPosition();
     }
 }

@@ -5,9 +5,9 @@
 #include "pchSFML.h"
 #include <datafile.h>
 
-#define WINDOW_NORMAL       (0)
-#define WINDOW_MAXIMIZED    (1)
-#define WINDOW_FULLSCREEN   (2)
+#define WINDOW_NORMAL (0)
+#define WINDOW_MAXIMIZED (1)
+#define WINDOW_SWAP_STATE (2)
 
 namespace sfte
 {
@@ -25,6 +25,8 @@ namespace sfte
 
         void display();
 
+        void set_state(int state = WINDOW_SWAP_STATE);
+
     private:
         sf::RenderWindow window;
         std::string title;
@@ -40,8 +42,6 @@ namespace sfte
         sf::Vector2i position_maximized;
 
         int window_state;
-
-        cge::data::Data_file data;
 
     private:
         bool try_from_file(); // TODO: broken
