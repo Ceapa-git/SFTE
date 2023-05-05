@@ -45,8 +45,15 @@ namespace sfte
         {
             this->window.create(sf::VideoMode(width, heigth), title, sf::Style::None);
             this->title = title;
+            
             this->size = this->window.getSize();
             this->position = this->window.getPosition();
+
+            this->size_normal = this->window.getSize();
+            this->position_normal = this->window.getPosition();
+
+            this->size_maximized = sf::Vector2u(0,0);
+            this->position_maximized = sf::Vector2i(1920,1020);
         }
         if (!std::filesystem::is_directory(".sfte"))
             std::filesystem::create_directory(".sfte");
@@ -59,10 +66,27 @@ namespace sfte
         this->data.add(4, d_content);
         ucharp_from_uint(d_content, this->size.y);
         this->data.add(4, d_content);
-
         ucharp_from_int(d_content, this->position.x);
         this->data.add(4, d_content);
         ucharp_from_int(d_content, this->position.y);
+        this->data.add(4, d_content);
+        
+        ucharp_from_uint(d_content, this->size_normal.x);
+        this->data.add(4, d_content);
+        ucharp_from_uint(d_content, this->size_normal.y);
+        this->data.add(4, d_content);
+        ucharp_from_int(d_content, this->position_normal.x);
+        this->data.add(4, d_content);
+        ucharp_from_int(d_content, this->position_normal.y);
+        this->data.add(4, d_content);
+
+        ucharp_from_uint(d_content, this->size_maximized.x);
+        this->data.add(4, d_content);
+        ucharp_from_uint(d_content, this->size_maximized.y);
+        this->data.add(4, d_content);
+        ucharp_from_int(d_content, this->position_maximized.x);
+        this->data.add(4, d_content);
+        ucharp_from_int(d_content, this->position_maximized.y);
         this->data.add(4, d_content);
     }
     bool Main_window::try_from_file()
@@ -71,7 +95,7 @@ namespace sfte
         load.load(".sfte/editor.bin");
         if (!load.is_valid())
             return false;
-        if (load.get_count() != 5)
+        if (load.get_count() != 13)
             return false;
 
         int d_size;
@@ -84,11 +108,28 @@ namespace sfte
         this->size.x = uint_from_ucharp(d_content);
         load.get(2, d_size, d_content);
         this->size.y = uint_from_ucharp(d_content);
-
         load.get(3, d_size, d_content);
         this->position.x = int_from_ucharp(d_content);
         load.get(4, d_size, d_content);
         this->position.y = int_from_ucharp(d_content);
+
+        load.get(5, d_size, d_content);
+        this->size_normal.x = uint_from_ucharp(d_content);
+        load.get(6, d_size, d_content);
+        this->size_normal.y = uint_from_ucharp(d_content);
+        load.get(7, d_size, d_content);
+        this->position_normal.x = int_from_ucharp(d_content);
+        load.get(8, d_size, d_content);
+        this->position_normal.y = int_from_ucharp(d_content);
+
+        load.get(9, d_size, d_content);
+        this->size_maximized.x = uint_from_ucharp(d_content);
+        load.get(10, d_size, d_content);
+        this->size_maximized.y = uint_from_ucharp(d_content);
+        load.get(11, d_size, d_content);
+        this->position_maximized.x = int_from_ucharp(d_content);
+        load.get(12, d_size, d_content);
+        this->position_maximized.y = int_from_ucharp(d_content);
 
         this->window.create(sf::VideoMode(this->size.x, this->size.y), this->title, sf::Style::None);
         this->window.setPosition(this->position);

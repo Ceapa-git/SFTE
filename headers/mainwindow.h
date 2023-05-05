@@ -5,14 +5,12 @@
 #include "pchSFML.h"
 #include <datafile.h>
 
+#define WINDOW_NORMAL       (0)
+#define WINDOW_MAXIMIZED    (1)
+#define WINDOW_FULLSCREEN   (2)
+
 namespace sfte
 {
-    typedef enum
-    {
-        MAXIMIZE,
-        NORMAL,
-        FULLSCREEN
-    } window_state;
     class Main_window
     {
     public:
@@ -30,8 +28,18 @@ namespace sfte
     private:
         sf::RenderWindow window;
         std::string title;
+
+        // ! current
         sf::Vector2u size;
         sf::Vector2i position;
+        // ! normal
+        sf::Vector2u size_normal;
+        sf::Vector2i position_normal;
+        // ! maximized
+        sf::Vector2u size_maximized;
+        sf::Vector2i position_maximized;
+
+        int window_state;
 
         cge::data::Data_file data;
 
