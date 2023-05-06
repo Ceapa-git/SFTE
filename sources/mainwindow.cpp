@@ -192,15 +192,14 @@ namespace sfte
     {
         if (event.type == sf::Event::EventType::MouseMoved)
         {
-            bool horizontal = false, vertical = false, left = false, right = false, down = false, up = false;
+            bool horizontal = false, vertical = false, left = false, up = false;
             if (event.mouseMove.x < 5)
             {
                 left = true;
                 horizontal = true;
             }
-            else if (event.mouseMove.x >= this->size.x - 5)
+            else if (event.mouseMove.x >= (int)this->size.x - 5)
             {
-                right = true;
                 horizontal = true;
             }
             if (event.mouseMove.y < 5)
@@ -208,36 +207,24 @@ namespace sfte
                 up = true;
                 vertical = true;
             }
-            else if (event.mouseMove.y >= this->size.y - 5)
+            else if (event.mouseMove.y >= (int)this->size.y - 5)
             {
-                down = true;
                 vertical = true;
             }
+
             sf::Cursor cursor;
-            cursor.loadFromSystem(sf::Cursor::Arrow);
-            if (horizontal && vertical)
+            if (!horizontal && !vertical)
+                cursor.loadFromSystem(sf::Cursor::Arrow);
+            else if (horizontal && vertical)
             {
-                if (left)
-                {
-                    if (up)
-                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
-                    else
-                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
-                }
-                else
-                {
-                    if (up)
-                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
-                    else
-                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
-                }
+                cursor.loadFromSystem(left
+                                          ? (up ? sf::Cursor::SizeTopLeftBottomRight : sf::Cursor::SizeBottomLeftTopRight)
+                                          : (up ? sf::Cursor::SizeBottomLeftTopRight : sf::Cursor::SizeTopLeftBottomRight));
             }
             else if (horizontal)
-            {
-            }
+                cursor.loadFromSystem(sf::Cursor::SizeHorizontal);
             else if (vertical)
-            {
-            }
+                cursor.loadFromSystem(sf::Cursor::SizeVertical);
 
             this->window.setMouseCursor(cursor);
         }
