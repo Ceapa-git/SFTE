@@ -51,7 +51,19 @@ namespace sfte
 
     private:
         bool try_from_file();
-        void mouse_resize(sf::Event& event);
+
+        void mouse_resize_window(sf::Event& event);
+        bool can_resize = false;
+        bool resizing = false;
+        bool horizontal_resize = false, vertical_resize = false;
+        bool left_resize = false, top_resize = false;
+        sf::Vector2i prev_pos_resize;
+        sf::Rect<int> window_rect_resize;
+
+        void mouse_move_window(sf::Event& event);
+        bool can_move = false;
+        bool moving = false;
+        sf::Vector2i prev_pos_move;
     };
 }
 

@@ -169,7 +169,8 @@ namespace sfte
         sf::Event event;
         while (this->window.pollEvent(event)) // TODO: call custom event callbacks
         {
-            this->mouse_resize(event);
+            this->mouse_resize_window(event);
+            this->mouse_move_window(event);
             if (event.type == sf::Event::EventType::KeyPressed)
             {
                 if (event.key.code == sf::Keyboard::Key::F4 && event.key.alt)
@@ -192,15 +193,10 @@ namespace sfte
             }
         }
     }
-    void Main_window::mouse_resize(sf::Event &event)
+    void Main_window::mouse_resize_window(sf::Event &event)
     {
-        static bool can_resize = false;
-        static bool resizing = false;
-        static bool horizontal = false, vertical = false, left = false, up = false;
-        static sf::Vector2i prev_pos;
-        static sf::Rect<int> window_rect;
-        static const sf::Rect<int> min_window(0, 0, 400, 200);
-        static const sf::Rect<int> max_window(1920, 1000, 1920, 1080);
+        static const sf::Rect<int> min_window(INT_MIN, INT_MIN, 400, 200);
+        static const sf::Rect<int> max_window(INT_MAX, INT_MAX, INT_MAX, INT_MAX);
         auto get_between = [](int v_min, int v_max, int val)
         {
             return std::min<int>(v_max, std::max<int>(v_min, val));
@@ -208,61 +204,61 @@ namespace sfte
 
         if (this->window_state == WINDOW_MAXIMIZED)
             return;
-        if (event.type == sf::Event::EventType::MouseMoved && !resizing)
+        if (event.type == sf::Event::EventType::MouseMoved && !this->resizing)
         {
-            horizontal = false, vertical = false, left = false, up = false;
-            if (event.mouseMove.x <= 5 && event.mouseMove.x != 0)
+            this->horizontal_resize = false, this->vertical_resize = false, this->left_resize = false, this->top_resize = false;
+            if (event.mouseMove.x <= 5)
             {
-                left = true;
-                horizontal = true;
+                this->left_resize = true;
+                this->horizontal_resize = true;
             }
-            else if (event.mouseMove.x >= (int)this->size.x - 6 && event.mouseMove.x != (int)this->size.x - 1)
+            else if (event.mouseMove.x >= (int)this->size.x - 6)
             {
-                horizontal = true;
+                this->horizontal_resize = true;
             }
-            if (event.mouseMove.y <= 5 && event.mouseMove.y != 0)
+            if (event.mouseMove.y <= 5)
             {
-                up = true;
-                vertical = true;
+                this->top_resize = true;
+                this->vertical_resize = true;
             }
-            else if (event.mouseMove.y >= (int)this->size.y - 6 && event.mouseMove.y != (int)this->size.y - 1)
+            else if (event.mouseMove.y >= (int)this->size.y - 6)
             {
-                vertical = true;
+                this->vertical_resize = true;
             }
 
             sf::Cursor cursor;
 
-            if (horizontal && vertical)
+            if (this->horizontal_resize && this->vertical_resize)
             {
-                can_resize = true;
-                if (left)
+                this->can_resize = true;
+                if (this->left_resize)
                 {
-                    if (up)
+                    if (this->top_resize)
                         cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
                     else
                         cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
                 }
                 else
                 {
-                    if (up)
+                    if (this->top_resize)
                         cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
                     else
                         cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
                 }
             }
-            else if (horizontal)
+            else if (this->horizontal_resize)
             {
-                can_resize = true;
+                this->can_resize = true;
                 cursor.loadFromSystem(sf::Cursor::SizeHorizontal);
             }
-            else if (vertical)
+            else if (this->vertical_resize)
             {
-                can_resize = true;
+                this->can_resize = true;
                 cursor.loadFromSystem(sf::Cursor::SizeVertical);
             }
-            else if (can_resize)
+            else if (this->can_resize)
             {
-                can_resize = false;
+                this->can_resize = false;
                 cursor.loadFromSystem(sf::Cursor::Arrow);
             }
             else
@@ -270,39 +266,39 @@ namespace sfte
 
             this->window.setMouseCursor(cursor);
         }
-        else if (event.type == sf::Event::EventType::MouseMoved && resizing)
+        else if (event.type == sf::Event::EventType::MouseMoved && this->resizing) // ? possile refactor of this
         {
-            sf::Vector2i dif_pos = sf::Mouse::getPosition() - prev_pos;
-            if (left)
+            sf::Vector2i dif_pos = sf::Mouse::getPosition() - this->prev_pos_resize;
+            if (this->left_resize)
                 dif_pos.x = -dif_pos.x;
-            if (up)
+            if (this->top_resize)
                 dif_pos.y = -dif_pos.y;
-            sf::Rect<int> new_window_rect = window_rect;
+            sf::Rect<int> new_window_rect = this->window_rect_resize;
 
-            if (horizontal)
+            if (this->horizontal_resize)
             {
-                new_window_rect.width = get_between(min_window.width, max_window.width, window_rect.width + dif_pos.x);
-                if (new_window_rect.width != window_rect.width)
+                new_window_rect.width = get_between(min_window.width, max_window.width, this->window_rect_resize.width + dif_pos.x);
+                if (new_window_rect.width != this->window_rect_resize.width)
                 {
-                    dif_pos.x = new_window_rect.width - window_rect.width;
-                    if (left)
+                    dif_pos.x = new_window_rect.width - window_rect_resize.width;
+                    if (this->left_resize)
                     {
-                        new_window_rect.left = get_between(min_window.left, max_window.left, window_rect.left - dif_pos.x);
+                        new_window_rect.left = get_between(min_window.left, max_window.left, this->window_rect_resize.left - dif_pos.x);
                         dif_pos.x = -dif_pos.x;
                     }
                 }
                 else
                     dif_pos.x = 0;
             }
-            if (vertical)
+            if (this->vertical_resize)
             {
-                new_window_rect.height = get_between(min_window.height, max_window.height, window_rect.height + dif_pos.y);
-                if (new_window_rect.height != window_rect.height)
+                new_window_rect.height = get_between(min_window.height, max_window.height, this->window_rect_resize.height + dif_pos.y);
+                if (new_window_rect.height != this->window_rect_resize.height)
                 {
-                    dif_pos.y = new_window_rect.height - window_rect.height;
-                    if (up)
+                    dif_pos.y = new_window_rect.height - this->window_rect_resize.height;
+                    if (this->top_resize)
                     {
-                        new_window_rect.top = get_between(min_window.top, max_window.top, window_rect.top - dif_pos.y);
+                        new_window_rect.top = get_between(min_window.top, max_window.top, this->window_rect_resize.top - dif_pos.y);
                         dif_pos.y = -dif_pos.y;
                     }
                 }
@@ -310,27 +306,57 @@ namespace sfte
                     dif_pos.y = 0;
             }
 
-            window_rect = new_window_rect;
-            prev_pos += dif_pos;
-            this->position = sf::Vector2i(window_rect.left, window_rect.top);
-            this->size = sf::Vector2u(static_cast<unsigned int>(window_rect.width), static_cast<unsigned int>(window_rect.height));
+            this->window_rect_resize = new_window_rect;
+            this->prev_pos_resize += dif_pos;
+            this->position = sf::Vector2i(window_rect_resize.left, window_rect_resize.top);
+            this->size = sf::Vector2u(static_cast<unsigned int>(window_rect_resize.width), static_cast<unsigned int>(window_rect_resize.height));
             this->window.setPosition(this->position);
             this->window.setSize(this->size);
         }
         else if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
         {
-            if (!can_resize)
+            if (!this->can_resize)
                 return;
-            resizing = true;
-            prev_pos = sf::Mouse::getPosition();
-            window_rect.left = this->position.x;
-            window_rect.top = this->position.y;
-            window_rect.width = this->size.x;
-            window_rect.height = this->size.y;
+            this->resizing = true;
+            this->prev_pos_resize = sf::Mouse::getPosition();
+            this->window_rect_resize.left = this->position.x;
+            this->window_rect_resize.top = this->position.y;
+            this->window_rect_resize.width = this->size.x;
+            this->window_rect_resize.height = this->size.y;
         }
         else if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left)
         {
-            resizing = false;
+            this->resizing = false;
+        }
+    }
+    void Main_window::mouse_move_window(sf::Event &event)
+    {
+        if (this->window_state == WINDOW_MAXIMIZED || this->can_resize || this->resizing)
+        {
+            this->can_move = false;
+            return;
+        }
+        if (event.type == sf::Event::EventType::MouseMoved && !this->moving)
+        {
+            this->can_move = this->title_bar_background.getLocalBounds().contains(sf::Vector2f(event.mouseMove.x * 1.f, event.mouseMove.y * 1.f));
+        }
+        else if (event.type == sf::Event::EventType::MouseMoved && this->moving)
+        {
+            sf::Vector2i dif_pos = sf::Mouse::getPosition() - this->prev_pos_move;
+            this->prev_pos_move = sf::Mouse::getPosition();
+            this->position += dif_pos;
+            this->window.setPosition(this->position);
+        }
+        else if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
+        {
+            if (!this->can_move)
+                return;
+            this->moving = true;
+            this->prev_pos_move = sf::Mouse::getPosition();
+        }
+        else if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left)
+        {
+            this->moving = false;
         }
     }
 
