@@ -17,7 +17,7 @@ namespace sfte
         Main_window() : Main_window(800, 600, "Simple Fast Text Editor"){};
         Main_window(const Main_window &other) = delete;
         ~Main_window();
-        explicit Main_window(unsigned int width, unsigned int heigth, std::string title);
+        explicit Main_window(unsigned int width, unsigned int height, std::string title);
 
         bool is_open();
         void poll_events();

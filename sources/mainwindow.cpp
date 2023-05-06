@@ -38,12 +38,12 @@ static void ucharp_from_int(unsigned char *ucharp, int val)
 
 namespace sfte
 {
-    Main_window::Main_window(unsigned int width, unsigned int heigth, std::string title)
+    Main_window::Main_window(unsigned int width, unsigned int height, std::string title)
     {
         bool file_succes = this->try_from_file();
         if (!file_succes)
         {
-            this->window.create(sf::VideoMode(width, heigth), title, sf::Style::None);
+            this->window.create(sf::VideoMode(width, height), title, sf::Style::None);
             this->title = title;
 
             this->size = this->window.getSize();
@@ -181,6 +181,10 @@ namespace sfte
             {
                 sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
                 window.setView(sf::View(visible_area));
+
+                sf::Vector2f new_size(this->title_bar_background.getSize());
+                new_size.x = this->size.x;
+                this->title_bar_background.setSize(new_size);
             }
             else if (event.type == sf::Event::EventType::Closed)
             {
@@ -190,43 +194,143 @@ namespace sfte
     }
     void Main_window::mouse_resize(sf::Event &event)
     {
-        if (event.type == sf::Event::EventType::MouseMoved)
+        static bool can_resize = false;
+        static bool resizing = false;
+        static bool horizontal = false, vertical = false, left = false, up = false;
+        static sf::Vector2i prev_pos;
+        static sf::Rect<int> window_rect;
+        static const sf::Rect<int> min_window(0, 0, 400, 200);
+        static const sf::Rect<int> max_window(1920, 1000, 1920, 1080);
+        auto get_between = [](int v_min, int v_max, int val)
         {
-            bool horizontal = false, vertical = false, left = false, up = false;
-            if (event.mouseMove.x < 5)
+            return std::min<int>(v_max, std::max<int>(v_min, val));
+        };
+
+        if (this->window_state == WINDOW_MAXIMIZED)
+            return;
+        if (event.type == sf::Event::EventType::MouseMoved && !resizing)
+        {
+            horizontal = false, vertical = false, left = false, up = false;
+            if (event.mouseMove.x <= 5 && event.mouseMove.x != 0)
             {
                 left = true;
                 horizontal = true;
             }
-            else if (event.mouseMove.x >= (int)this->size.x - 5)
+            else if (event.mouseMove.x >= (int)this->size.x - 6 && event.mouseMove.x != (int)this->size.x - 1)
             {
                 horizontal = true;
             }
-            if (event.mouseMove.y < 5)
+            if (event.mouseMove.y <= 5 && event.mouseMove.y != 0)
             {
                 up = true;
                 vertical = true;
             }
-            else if (event.mouseMove.y >= (int)this->size.y - 5)
+            else if (event.mouseMove.y >= (int)this->size.y - 6 && event.mouseMove.y != (int)this->size.y - 1)
             {
                 vertical = true;
             }
 
             sf::Cursor cursor;
-            if (!horizontal && !vertical)
-                cursor.loadFromSystem(sf::Cursor::Arrow);
-            else if (horizontal && vertical)
+
+            if (horizontal && vertical)
             {
-                cursor.loadFromSystem(left
-                                          ? (up ? sf::Cursor::SizeTopLeftBottomRight : sf::Cursor::SizeBottomLeftTopRight)
-                                          : (up ? sf::Cursor::SizeBottomLeftTopRight : sf::Cursor::SizeTopLeftBottomRight));
+                can_resize = true;
+                if (left)
+                {
+                    if (up)
+                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
+                    else
+                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
+                }
+                else
+                {
+                    if (up)
+                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
+                    else
+                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
+                }
             }
             else if (horizontal)
+            {
+                can_resize = true;
                 cursor.loadFromSystem(sf::Cursor::SizeHorizontal);
+            }
             else if (vertical)
+            {
+                can_resize = true;
                 cursor.loadFromSystem(sf::Cursor::SizeVertical);
+            }
+            else if (can_resize)
+            {
+                can_resize = false;
+                cursor.loadFromSystem(sf::Cursor::Arrow);
+            }
+            else
+                return;
 
             this->window.setMouseCursor(cursor);
+        }
+        else if (event.type == sf::Event::EventType::MouseMoved && resizing)
+        {
+            sf::Vector2i dif_pos = sf::Mouse::getPosition() - prev_pos;
+            if (left)
+                dif_pos.x = -dif_pos.x;
+            if (up)
+                dif_pos.y = -dif_pos.y;
+            sf::Rect<int> new_window_rect = window_rect;
+
+            if (horizontal)
+            {
+                new_window_rect.width = get_between(min_window.width, max_window.width, window_rect.width + dif_pos.x);
+                if (new_window_rect.width != window_rect.width)
+                {
+                    dif_pos.x = new_window_rect.width - window_rect.width;
+                    if (left)
+                    {
+                        new_window_rect.left = get_between(min_window.left, max_window.left, window_rect.left - dif_pos.x);
+                        dif_pos.x = -dif_pos.x;
+                    }
+                }
+                else
+                    dif_pos.x = 0;
+            }
+            if (vertical)
+            {
+                new_window_rect.height = get_between(min_window.height, max_window.height, window_rect.height + dif_pos.y);
+                if (new_window_rect.height != window_rect.height)
+                {
+                    dif_pos.y = new_window_rect.height - window_rect.height;
+                    if (up)
+                    {
+                        new_window_rect.top = get_between(min_window.top, max_window.top, window_rect.top - dif_pos.y);
+                        dif_pos.y = -dif_pos.y;
+                    }
+                }
+                else
+                    dif_pos.y = 0;
+            }
+
+            window_rect = new_window_rect;
+            prev_pos += dif_pos;
+            this->position = sf::Vector2i(window_rect.left, window_rect.top);
+            this->size = sf::Vector2u(static_cast<unsigned int>(window_rect.width), static_cast<unsigned int>(window_rect.height));
+            this->window.setPosition(this->position);
+            this->window.setSize(this->size);
+        }
+        else if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left)
+        {
+            if (!can_resize)
+                return;
+            resizing = true;
+            prev_pos = sf::Mouse::getPosition();
+            window_rect.left = this->position.x;
+            window_rect.top = this->position.y;
+            window_rect.width = this->size.x;
+            window_rect.height = this->size.y;
+        }
+        else if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left)
+        {
+            resizing = false;
         }
     }
 
@@ -264,9 +368,5 @@ namespace sfte
 
         this->size = this->window.getSize();
         this->position = this->window.getPosition();
-
-        sf::Vector2f new_size(this->title_bar_background.getSize());
-        new_size.x = this->size.x;
-        this->title_bar_background.setSize(new_size);
     }
 }
