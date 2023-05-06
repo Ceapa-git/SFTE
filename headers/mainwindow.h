@@ -51,6 +51,7 @@ namespace sfte
 
     private:
         bool try_from_file();
+        void mouse_resize(sf::Event& event);
     };
 }
 

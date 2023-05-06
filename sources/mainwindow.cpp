@@ -167,24 +167,79 @@ namespace sfte
     void Main_window::poll_events()
     {
         sf::Event event;
-        while (this->window.pollEvent(event))
+        while (this->window.pollEvent(event)) // TODO: call custom event callbacks
         {
-            if (event.type == sf::Event::EventType::Closed)
-            {
-                this->window.close();
-            }
-            else if (event.type == sf::Event::Resized)
-            {
-                sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
-                window.setView(sf::View(visible_area));
-            }
-            else if (event.type == sf::Event::EventType::KeyPressed)
+            this->mouse_resize(event);
+            if (event.type == sf::Event::EventType::KeyPressed)
             {
                 if (event.key.code == sf::Keyboard::Key::F4 && event.key.alt)
                     this->window.close();
                 else if (event.key.code == sf::Keyboard::Key::F12)
                     this->set_state();
             }
+            else if (event.type == sf::Event::Resized)
+            {
+                sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visible_area));
+            }
+            else if (event.type == sf::Event::EventType::Closed)
+            {
+                this->window.close();
+            }
+        }
+    }
+    void Main_window::mouse_resize(sf::Event &event)
+    {
+        if (event.type == sf::Event::EventType::MouseMoved)
+        {
+            bool horizontal = false, vertical = false, left = false, right = false, down = false, up = false;
+            if (event.mouseMove.x < 5)
+            {
+                left = true;
+                horizontal = true;
+            }
+            else if (event.mouseMove.x >= this->size.x - 5)
+            {
+                right = true;
+                horizontal = true;
+            }
+            if (event.mouseMove.y < 5)
+            {
+                up = true;
+                vertical = true;
+            }
+            else if (event.mouseMove.y >= this->size.y - 5)
+            {
+                down = true;
+                vertical = true;
+            }
+            sf::Cursor cursor;
+            cursor.loadFromSystem(sf::Cursor::Arrow);
+            if (horizontal && vertical)
+            {
+                if (left)
+                {
+                    if (up)
+                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
+                    else
+                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
+                }
+                else
+                {
+                    if (up)
+                        cursor.loadFromSystem(sf::Cursor::SizeBottomLeftTopRight);
+                    else
+                        cursor.loadFromSystem(sf::Cursor::SizeTopLeftBottomRight);
+                }
+            }
+            else if (horizontal)
+            {
+            }
+            else if (vertical)
+            {
+            }
+
+            this->window.setMouseCursor(cursor);
         }
     }
 
@@ -205,12 +260,16 @@ namespace sfte
             return;
         if (state == WINDOW_NORMAL || (this->window_state == WINDOW_MAXIMIZED && state == WINDOW_SWAP_STATE))
         {
+            this->size_maximized = this->window.getSize();
+            this->position_maximized = this->window.getPosition();
             this->window.setSize(this->size_normal);
             this->window.setPosition(this->position_normal);
             this->window_state = WINDOW_NORMAL;
         }
         else if (state == WINDOW_MAXIMIZED || (this->window_state == WINDOW_NORMAL && state == WINDOW_SWAP_STATE))
         {
+            this->size_normal = this->window.getSize();
+            this->position_normal = this->window.getPosition();
             this->window.setSize(this->size_maximized);
             this->window.setPosition(this->position_maximized);
             this->window_state = WINDOW_MAXIMIZED;
@@ -221,6 +280,6 @@ namespace sfte
 
         sf::Vector2f new_size(this->title_bar_background.getSize());
         new_size.x = this->size.x;
-        this->title_bar_background.setSize(new_size); // TODO: scale not right
+        this->title_bar_background.setSize(new_size);
     }
 }
