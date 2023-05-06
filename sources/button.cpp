@@ -19,8 +19,16 @@ namespace sfte
 
     bool Button::is_mouse_over(sf::RenderWindow &window) const
     {
-        return this->sprite.getGlobalBounds().contains(
-            static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)));
+        sf::FloatRect transformedBounds = getTransform().transformRect(sprite.getGlobalBounds());
+        return transformedBounds.contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)));
+    }
+    void Button::set_pressed(bool state)
+    {
+        this->pressed = state;
+    }
+    bool Button::is_pressed() const
+    {
+        return this->pressed;
     }
 
     void Button::draw(sf::RenderTarget &target, sf::RenderStates states) const
