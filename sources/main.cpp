@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "pchSFML.h"
+
+#include <logger.h>
 #include "mainwindow.h"
-#include "logger.h"
 
 int main(int argc, char **argv)
 {

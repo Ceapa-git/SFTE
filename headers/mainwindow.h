@@ -3,7 +3,9 @@
 
 #include "pch.h"
 #include "pchSFML.h"
+
 #include <datafile.h>
+#include "button.h"
 
 #define WINDOW_NORMAL (0)
 #define WINDOW_MAXIMIZED (1)
@@ -41,18 +43,21 @@ namespace sfte
         sf::Vector2u size_maximized;
         sf::Vector2i position_maximized;
 
-        std::vector<sf::Drawable *> title_bar;
+        std::vector<sf::Drawable *> title_bar; // ? maybe new class
+        float title_bar_height = 20.f;
+        sfte::Button exit_button;
+        sfte::Button maximize_button;
         sf::RectangleShape title_bar_background;
 
         // TODO: way to remember smallerwindow details
-        std::vector<sf::Drawable> panels; // * temporary name
+        std::vector<sf::Drawable *> panels; // * temporary name
 
         int window_state;
 
     private:
         bool try_from_file();
 
-        void mouse_resize_window(sf::Event& event);
+        void mouse_resize_window(sf::Event &event);
         bool can_resize = false;
         bool resizing = false;
         bool horizontal_resize = false, vertical_resize = false;
@@ -60,7 +65,7 @@ namespace sfte
         sf::Vector2i prev_pos_resize;
         sf::Rect<int> window_rect_resize;
 
-        void mouse_move_window(sf::Event& event);
+        void mouse_move_window(sf::Event &event);
         bool can_move = false;
         bool moving = false;
         sf::Vector2i prev_pos_move;

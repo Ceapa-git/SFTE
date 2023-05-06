@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "pchSFML.h"
+
+#include <logger.h>
 #include "mainwindow.h"
-#include "logger.h"
+#include "button.h"
 
 static unsigned int uint_from_ucharp(const unsigned char *ucharp)
 {
@@ -39,6 +41,8 @@ static void ucharp_from_int(unsigned char *ucharp, int val)
 namespace sfte
 {
     Main_window::Main_window(unsigned int width, unsigned int height, std::string title)
+        : exit_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Red, title_bar_height),
+          maximize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Green, title_bar_height)
     {
         bool file_succes = this->try_from_file();
         if (!file_succes)
@@ -58,11 +62,17 @@ namespace sfte
             this->window_state = WINDOW_NORMAL;
         }
         // TODO: create title bar
-        this->title_bar_background.setSize(sf::Vector2f(this->size.x, 20.f));
+        this->title_bar_background.setSize(sf::Vector2f(this->size.x, title_bar_height));
         this->title_bar_background.setPosition(0.f, 0.f);
         this->title_bar_background.setFillColor(sf::Color(133, 129, 119));
         this->title_bar_background.setOutlineThickness(0.f);
         this->title_bar.push_back(&this->title_bar_background);
+
+        this->maximize_button.setPosition(sf::Vector2f(this->size.x - 2.f * title_bar_height, 0.f));
+        this->title_bar.push_back(&this->maximize_button);
+
+        this->exit_button.setPosition(sf::Vector2f(this->size.x - title_bar_height, 0.f));
+        this->title_bar.push_back(&this->exit_button);
     }
     bool Main_window::try_from_file()
     {
@@ -180,12 +190,16 @@ namespace sfte
             }
             else if (event.type == sf::Event::Resized)
             {
-                sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
-                window.setView(sf::View(visible_area));
 
                 sf::Vector2f new_size(this->title_bar_background.getSize());
                 new_size.x = this->size.x;
                 this->title_bar_background.setSize(new_size);
+
+                this->maximize_button.setPosition(this->size.x - 2.f * title_bar_height, 0.f);
+                this->exit_button.setPosition(this->size.x - title_bar_height, 0.f);
+
+                sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visible_area));
             }
             else if (event.type == sf::Event::EventType::Closed)
             {
@@ -338,7 +352,8 @@ namespace sfte
         }
         if (event.type == sf::Event::EventType::MouseMoved && !this->moving)
         {
-            this->can_move = this->title_bar_background.getLocalBounds().contains(sf::Vector2f(event.mouseMove.x * 1.f, event.mouseMove.y * 1.f));
+            sf::Vector2f mouse_pos = sf::Vector2f(event.mouseMove.x * 1.f, event.mouseMove.y * 1.f);
+            this->can_move = this->title_bar_background.getGlobalBounds().contains(mouse_pos);
         }
         else if (event.type == sf::Event::EventType::MouseMoved && this->moving)
         {
@@ -363,11 +378,10 @@ namespace sfte
     void Main_window::display()
     {
         this->window.clear();
-        // TODO: display title bar
         for (sf::Drawable *&drawable : this->title_bar)
             this->window.draw(*drawable);
-        for (sf::Drawable &drawable : this->panels)
-            this->window.draw(drawable);
+        for (sf::Drawable *&drawable : this->panels)
+            this->window.draw(*drawable);
         this->window.display();
     }
 
