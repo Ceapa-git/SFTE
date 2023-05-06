@@ -173,6 +173,11 @@ namespace sfte
             {
                 this->window.close();
             }
+            else if (event.type == sf::Event::Resized)
+            {
+                sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visible_area));
+            }
             else if (event.type == sf::Event::EventType::KeyPressed)
             {
                 if (event.key.code == sf::Keyboard::Key::F4 && event.key.alt)
@@ -214,8 +219,8 @@ namespace sfte
         this->size = this->window.getSize();
         this->position = this->window.getPosition();
 
-        sf::Vector2f old_size(this->title_bar_background.getSize());
-        old_size.x = this->size.x;
-        this->title_bar_background.setSize(old_size);
+        sf::Vector2f new_size(this->title_bar_background.getSize());
+        new_size.x = this->size.x;
+        this->title_bar_background.setSize(new_size); // TODO: scale not right
     }
 }
