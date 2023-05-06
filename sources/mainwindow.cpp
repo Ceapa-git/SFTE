@@ -202,7 +202,7 @@ namespace sfte
             return std::min<int>(v_max, std::max<int>(v_min, val));
         };
 
-        if (this->window_state == WINDOW_MAXIMIZED)
+        if (this->window_state == WINDOW_MAXIMIZED || this->moving)
             return;
         if (event.type == sf::Event::EventType::MouseMoved && !this->resizing)
         {
