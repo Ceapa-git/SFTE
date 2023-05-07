@@ -6,6 +6,7 @@
 
 #include <datafile.h>
 #include "button.h"
+#include "titlebar.h"
 
 #define WINDOW_NORMAL (0)
 #define WINDOW_MAXIMIZED (1)
@@ -17,7 +18,8 @@ namespace sfte
     {
     public:
         Main_window() : Main_window(800, 600, "Simple Fast Text Editor"){};
-        Main_window(const Main_window &other) = delete;
+        Main_window(const Main_window &) = delete;
+        Main_window &operator=(const Main_window &) = delete;
         ~Main_window();
         explicit Main_window(unsigned int width, unsigned int height, std::string title);
 

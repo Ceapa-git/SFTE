@@ -192,7 +192,7 @@ namespace sfte
                 else if (event.key.code == sf::Keyboard::Key::F12)
                     this->set_state();
             }
-            else if (event.type == sf::Event::EventType::MouseButtonPressed)
+            else if (event.type == sf::Event::EventType::MouseButtonPressed) // TODO: move to title bar V
             {
                 if (this->exit_button.is_mouse_over(this->window))
                     this->exit_button.set_pressed();
@@ -219,13 +219,12 @@ namespace sfte
                 this->maximize_button.set_pressed(false);
                 this->minimize_button.set_pressed(false);
             }
-            else if (event.type == sf::Event::EventType::GainedFocus)
+            else if (event.type == sf::Event::EventType::GainedFocus) // TODO: move to title bar ^
             {
                 this->window.setPosition(this->position);
             }
             else if (event.type == sf::Event::EventType::Resized)
             {
-
                 sf::Vector2f new_size(this->title_bar_background.getSize());
                 new_size.x = this->size.x;
                 this->title_bar_background.setSize(new_size);
