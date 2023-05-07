@@ -6,6 +6,11 @@
 
 #include "button.h"
 
+#define TITLE_BAR (1)
+#define BUTTON_MINIMIZE (2)
+#define BUTTON_MAXIMIZE (3)
+#define BUTTON_EXIT (4)
+
 namespace sfte
 {
     class Title_bar : public sf::Drawable
@@ -18,8 +23,11 @@ namespace sfte
         ~Title_bar() {}
 
         void resize(float width);
-        // TODO: is mouse over button
-        // TODO: is mouse over bar
+
+        void press_button_mouse_over(sf::RenderWindow &window);
+        int is_mouse_over(sf::RenderWindow &window) const;
+        void press_button(int button);
+        int pressed_button() const;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 

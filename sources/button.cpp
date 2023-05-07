@@ -13,7 +13,7 @@ namespace sfte
             throw std::runtime_error("Failed to load texture: " + texture_path);
         this->sprite.setTexture(this->texture);
         this->sprite.setScale(width / this->texture.getSize().x, height / this->texture.getSize().y);
-        this->sprite.setPosition(position);
+        this->setPosition(position);
         this->sprite.setColor(color);
         this->pressed = false;
     }

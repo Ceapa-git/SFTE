@@ -45,12 +45,7 @@ namespace sfte
         sf::Vector2u size_maximized;
         sf::Vector2i position_maximized;
 
-        std::vector<sf::Drawable *> title_bar; // ? maybe new class
-        float title_bar_height = 20.f;
-        sfte::Button exit_button;
-        sfte::Button maximize_button;
-        sfte::Button minimize_button;
-        sf::RectangleShape title_bar_background;
+        sfte::Title_bar title_bar;
 
         // TODO: way to remember smallerwindow details
         std::vector<sf::Drawable *> panels; // * temporary name

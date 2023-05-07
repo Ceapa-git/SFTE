@@ -30,9 +30,55 @@ namespace sfte
 
     void Title_bar::draw(sf::RenderTarget &target, sf::RenderStates states) const
     {
-        this->minimize_button.draw(target, states);
-        this->maximize_button.draw(target, states);
-        this->exit_button.draw(target, states);
+        target.draw(this->title_bar_background, states);
+        target.draw(this->minimize_button, states);
+        target.draw(this->maximize_button, states);
+        target.draw(this->exit_button, states);
+    }
+
+    void Title_bar::press_button_mouse_over(sf::RenderWindow &window)
+    {
+        int button = this->is_mouse_over(window);
+        this->press_button(button);
+    }
+    int Title_bar::is_mouse_over(sf::RenderWindow &window) const
+    {
+        if (!this->title_bar_background.getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window))))
+            return 0;
+
+        if (this->minimize_button.is_mouse_over(window))
+            return BUTTON_MINIMIZE;
+        if (this->maximize_button.is_mouse_over(window))
+            return BUTTON_MAXIMIZE;
+        if (this->exit_button.is_mouse_over(window))
+            return BUTTON_EXIT;
+
+        return TITLE_BAR;
+    }
+    void Title_bar::press_button(int button)
+    {
+        if (button == BUTTON_MINIMIZE)
+            this->minimize_button.set_pressed();
+        else if (button == BUTTON_MAXIMIZE)
+            this->maximize_button.set_pressed();
+        else if (button == BUTTON_EXIT)
+            this->exit_button.set_pressed();
+        else
+        {
+            this->minimize_button.set_pressed(false);
+            this->maximize_button.set_pressed(false);
+            this->exit_button.set_pressed(false);
+        }
+    }
+    int Title_bar::pressed_button() const
+    {
+        if (this->minimize_button.is_pressed())
+            return BUTTON_MINIMIZE;
+        else if (this->maximize_button.is_pressed())
+            return BUTTON_MAXIMIZE;
+        else if (this->exit_button.is_pressed())
+            return BUTTON_EXIT;
+        return 0;
     }
 
 }

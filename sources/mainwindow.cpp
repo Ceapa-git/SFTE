@@ -41,9 +41,7 @@ static void ucharp_from_int(unsigned char *ucharp, int val)
 namespace sfte
 {
     Main_window::Main_window(unsigned int width, unsigned int height, std::string title)
-        : exit_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Red, title_bar_height),
-          maximize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Green, title_bar_height),
-          minimize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Yellow, title_bar_height)
+        : title_bar(title, width, 20.f)
     {
         bool file_succes = this->try_from_file();
         if (!file_succes)
@@ -62,21 +60,8 @@ namespace sfte
 
             this->window_state = WINDOW_NORMAL;
         }
-        // TODO: create title bar
-        this->title_bar_background.setSize(sf::Vector2f(this->size.x, title_bar_height));
-        this->title_bar_background.setPosition(0.f, 0.f);
-        this->title_bar_background.setFillColor(sf::Color(133, 129, 119));
-        this->title_bar_background.setOutlineThickness(0.f);
-        this->title_bar.push_back(&this->title_bar_background);
 
-        this->minimize_button.setPosition(sf::Vector2f(this->size.x - 3.5f * title_bar_height, 0.f));
-        this->title_bar.push_back(&this->minimize_button);
-
-        this->maximize_button.setPosition(sf::Vector2f(this->size.x - 2.5f * title_bar_height, 0.f));
-        this->title_bar.push_back(&this->maximize_button);
-
-        this->exit_button.setPosition(sf::Vector2f(this->size.x - 1.5f * title_bar_height, 0.f));
-        this->title_bar.push_back(&this->exit_button);
+        this->title_bar.resize(this->size.x);
     }
     bool Main_window::try_from_file()
     {
@@ -192,46 +177,44 @@ namespace sfte
                 else if (event.key.code == sf::Keyboard::Key::F12)
                     this->set_state();
             }
-            else if (event.type == sf::Event::EventType::MouseButtonPressed) // TODO: move to title bar V
+            else if (event.type == sf::Event::EventType::MouseButtonPressed)
             {
-                if (this->exit_button.is_mouse_over(this->window))
-                    this->exit_button.set_pressed();
-                else if (this->maximize_button.is_mouse_over(this->window))
-                    this->maximize_button.set_pressed();
-                else if (this->minimize_button.is_mouse_over(this->window))
-                    this->minimize_button.set_pressed();
+                this->title_bar.press_button_mouse_over(this->window);
             }
             else if (event.type == sf::Event::EventType::MouseButtonReleased)
             {
-                if (this->exit_button.is_mouse_over(this->window) && this->exit_button.is_pressed())
-                    this->window.close();
-                else if (this->maximize_button.is_mouse_over(this->window) && this->maximize_button.is_pressed())
-                    this->set_state();
-                else if (this->minimize_button.is_mouse_over(this->window) && this->minimize_button.is_pressed())
-                    this->window.setPosition(sf::Vector2i(this->position.x, -this->size.y - 10));
-                this->exit_button.set_pressed(false);
-                this->maximize_button.set_pressed(false);
-                this->minimize_button.set_pressed(false);
+                int button_pressed = this->title_bar.pressed_button();
+                int mouse_over = this->title_bar.is_mouse_over(window);
+                if (button_pressed == mouse_over)
+                {
+                    switch (button_pressed)
+                    {
+                    case BUTTON_MINIMIZE:
+                        this->window.setPosition(sf::Vector2i(this->position.x, -this->size.y - 10));
+                        break;
+                    case BUTTON_MAXIMIZE:
+                        this->set_state();
+                        break;
+                    case BUTTON_EXIT:
+                        this->window.close();
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                this->title_bar.press_button(0);
             }
             else if (event.type == sf::Event::EventType::LostFocus)
             {
-                this->exit_button.set_pressed(false);
-                this->maximize_button.set_pressed(false);
-                this->minimize_button.set_pressed(false);
+                this->title_bar.press_button(0);
             }
-            else if (event.type == sf::Event::EventType::GainedFocus) // TODO: move to title bar ^
+            else if (event.type == sf::Event::EventType::GainedFocus)
             {
                 this->window.setPosition(this->position);
             }
             else if (event.type == sf::Event::EventType::Resized)
             {
-                sf::Vector2f new_size(this->title_bar_background.getSize());
-                new_size.x = this->size.x;
-                this->title_bar_background.setSize(new_size);
-
-                this->minimize_button.setPosition(this->size.x - 3.5f * title_bar_height, 0.f);
-                this->maximize_button.setPosition(this->size.x - 2.5f * title_bar_height, 0.f);
-                this->exit_button.setPosition(this->size.x - 1.5f * title_bar_height, 0.f);
+                this->title_bar.resize(event.size.width);
 
                 sf::FloatRect visible_area(0, 0, event.size.width, event.size.height);
                 window.setView(sf::View(visible_area));
@@ -252,8 +235,7 @@ namespace sfte
         };
 
         if (this->window_state == WINDOW_MAXIMIZED || this->moving ||
-            this->exit_button.is_mouse_over(this->window) || this->maximize_button.is_mouse_over(this->window) ||
-            this->minimize_button.is_mouse_over(this->window))
+            this->title_bar.is_mouse_over(this->window) > TITLE_BAR)
         {
             if (this->can_resize)
             {
@@ -392,16 +374,14 @@ namespace sfte
     void Main_window::mouse_move_window(sf::Event &event)
     {
         if (this->window_state == WINDOW_MAXIMIZED || this->can_resize || this->resizing ||
-            this->exit_button.is_mouse_over(this->window) || this->maximize_button.is_mouse_over(this->window) ||
-            this->minimize_button.is_mouse_over(this->window))
+            this->title_bar.is_mouse_over(this->window) > TITLE_BAR)
         {
             this->can_move = false;
             return;
         }
         if (event.type == sf::Event::EventType::MouseMoved && !this->moving)
         {
-            sf::Vector2f mouse_pos = sf::Vector2f(event.mouseMove.x * 1.f, event.mouseMove.y * 1.f);
-            this->can_move = this->title_bar_background.getGlobalBounds().contains(mouse_pos);
+            this->can_move = this->title_bar.is_mouse_over(this->window);
         }
         else if (event.type == sf::Event::EventType::MouseMoved && this->moving)
         {
@@ -426,8 +406,7 @@ namespace sfte
     void Main_window::display()
     {
         this->window.clear();
-        for (sf::Drawable *&drawable : this->title_bar)
-            this->window.draw(*drawable);
+        this->window.draw(this->title_bar);
         for (sf::Drawable *&drawable : this->panels)
             this->window.draw(*drawable);
         this->window.display();
