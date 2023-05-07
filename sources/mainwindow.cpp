@@ -42,7 +42,8 @@ namespace sfte
 {
     Main_window::Main_window(unsigned int width, unsigned int height, std::string title)
         : exit_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Red, title_bar_height),
-          maximize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Green, title_bar_height)
+          maximize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Green, title_bar_height),
+          minimize_button("res\\circle_button.png", sf::Vector2f(0.f, 0.f), sf::Color::Yellow, title_bar_height)
     {
         bool file_succes = this->try_from_file();
         if (!file_succes)
@@ -67,6 +68,9 @@ namespace sfte
         this->title_bar_background.setFillColor(sf::Color(133, 129, 119));
         this->title_bar_background.setOutlineThickness(0.f);
         this->title_bar.push_back(&this->title_bar_background);
+
+        this->minimize_button.setPosition(sf::Vector2f(this->size.x - 3.5f * title_bar_height, 0.f));
+        this->title_bar.push_back(&this->minimize_button);
 
         this->maximize_button.setPosition(sf::Vector2f(this->size.x - 2.5f * title_bar_height, 0.f));
         this->title_bar.push_back(&this->maximize_button);
@@ -194,6 +198,8 @@ namespace sfte
                     this->exit_button.set_pressed();
                 else if (this->maximize_button.is_mouse_over(this->window))
                     this->maximize_button.set_pressed();
+                else if (this->minimize_button.is_mouse_over(this->window))
+                    this->minimize_button.set_pressed();
             }
             else if (event.type == sf::Event::EventType::MouseButtonReleased)
             {
@@ -201,6 +207,21 @@ namespace sfte
                     this->window.close();
                 else if (this->maximize_button.is_mouse_over(this->window) && this->maximize_button.is_pressed())
                     this->set_state();
+                else if (this->minimize_button.is_mouse_over(this->window) && this->minimize_button.is_pressed())
+                    this->window.setPosition(sf::Vector2i(this->position.x, -this->size.y - 10));
+                this->exit_button.set_pressed(false);
+                this->maximize_button.set_pressed(false);
+                this->minimize_button.set_pressed(false);
+            }
+            else if (event.type == sf::Event::EventType::LostFocus)
+            {
+                this->exit_button.set_pressed(false);
+                this->maximize_button.set_pressed(false);
+                this->minimize_button.set_pressed(false);
+            }
+            else if (event.type == sf::Event::EventType::GainedFocus)
+            {
+                this->window.setPosition(this->position);
             }
             else if (event.type == sf::Event::EventType::Resized)
             {
@@ -209,6 +230,7 @@ namespace sfte
                 new_size.x = this->size.x;
                 this->title_bar_background.setSize(new_size);
 
+                this->minimize_button.setPosition(this->size.x - 3.5f * title_bar_height, 0.f);
                 this->maximize_button.setPosition(this->size.x - 2.5f * title_bar_height, 0.f);
                 this->exit_button.setPosition(this->size.x - 1.5f * title_bar_height, 0.f);
 
@@ -230,8 +252,19 @@ namespace sfte
             return std::min<int>(v_max, std::max<int>(v_min, val));
         };
 
-        if (this->window_state == WINDOW_MAXIMIZED || this->moving)
+        if (this->window_state == WINDOW_MAXIMIZED || this->moving ||
+            this->exit_button.is_mouse_over(this->window) || this->maximize_button.is_mouse_over(this->window) ||
+            this->minimize_button.is_mouse_over(this->window))
+        {
+            if (this->can_resize)
+            {
+                sf::Cursor cursor;
+                this->can_resize = false;
+                cursor.loadFromSystem(sf::Cursor::Arrow);
+                this->window.setMouseCursor(cursor);
+            }
             return;
+        }
         if (event.type == sf::Event::EventType::MouseMoved && !this->resizing)
         {
             this->horizontal_resize = false, this->vertical_resize = false, this->left_resize = false, this->top_resize = false;
@@ -360,7 +393,8 @@ namespace sfte
     void Main_window::mouse_move_window(sf::Event &event)
     {
         if (this->window_state == WINDOW_MAXIMIZED || this->can_resize || this->resizing ||
-            this->exit_button.is_mouse_over(this->window) || this->maximize_button.is_mouse_over(this->window))
+            this->exit_button.is_mouse_over(this->window) || this->maximize_button.is_mouse_over(this->window) ||
+            this->minimize_button.is_mouse_over(this->window))
         {
             this->can_move = false;
             return;

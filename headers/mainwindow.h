@@ -47,6 +47,7 @@ namespace sfte
         float title_bar_height = 20.f;
         sfte::Button exit_button;
         sfte::Button maximize_button;
+        sfte::Button minimize_button;
         sf::RectangleShape title_bar_background;
 
         // TODO: way to remember smallerwindow details

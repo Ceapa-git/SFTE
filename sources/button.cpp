@@ -15,6 +15,7 @@ namespace sfte
         this->sprite.setScale(width / this->texture.getSize().x, height / this->texture.getSize().y);
         this->sprite.setPosition(position);
         this->sprite.setColor(color);
+        this->pressed = false;
     }
 
     bool Button::is_mouse_over(sf::RenderWindow &window) const
