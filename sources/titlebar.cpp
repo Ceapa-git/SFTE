@@ -7,30 +7,50 @@
 
 namespace sfte
 {
-    Title_bar::Title_bar(const std::string &title, float width, float title_bar_height)
+    Title_bar::Title_bar(float width, float title_bar_height)
         : exit_button("res\\circle_button.png", sf::Vector2f(width - 1.5f * title_bar_height, 0.f), sf::Color::Red, title_bar_height),
           maximize_button("res\\circle_button.png", sf::Vector2f(width - 2.5f * title_bar_height, 0.f), sf::Color::Green, title_bar_height),
           minimize_button("res\\circle_button.png", sf::Vector2f(width - 3.5f * title_bar_height, 0.f), sf::Color::Yellow, title_bar_height)
     {
-        this->title = title;
         this->title_bar_height = title_bar_height;
         this->title_bar_background.setSize(sf::Vector2f(width, this->title_bar_height));
         this->title_bar_background.setPosition(0.f, 0.f);
         this->title_bar_background.setFillColor(sf::Color(133, 129, 119));
         this->title_bar_background.setOutlineThickness(0.f);
+
+        this->title_lable.setCharacterSize(static_cast<unsigned int>(title_bar_height) - 2 * this->padding);
+        this->title_lable.setFillColor(sf::Color::White);
+        this->title_lable.setOutlineColor(sf::Color::Transparent);
+        this->title_lable.setOutlineThickness(0.f);
+        this->title_lable.setStyle(sf::Text::Regular);
+
+        this->font.loadFromFile("res\\CONSOLA.TTF");
+        this->title_lable.setFont(font);
+
+        this->title_lable.setPosition(sf::Vector2f(width / 2.f - this->title_lable.getGlobalBounds().width / 2.f, 0.f));
     }
 
+    void Title_bar::set_title(const std::string &title)
+    {
+        this->title = title;
+        float prev_width = this->title_lable.getGlobalBounds().width;
+        this->title_lable.setString(this->title);
+        float new_x = this->title_lable.getPosition().x + (prev_width - this->title_lable.getGlobalBounds().width) / 2.f;
+        this->title_lable.setPosition(sf::Vector2f(new_x, 0.f));
+    }
     void Title_bar::resize(float width)
     {
         this->title_bar_background.setSize(sf::Vector2f(width, this->title_bar_height));
         this->minimize_button.setPosition(sf::Vector2f(width - 3.5f * this->title_bar_height, 0.f));
         this->maximize_button.setPosition(sf::Vector2f(width - 2.5f * this->title_bar_height, 0.f));
         this->exit_button.setPosition(sf::Vector2f(width - 1.5f * this->title_bar_height, 0.f));
+        this->title_lable.setPosition(sf::Vector2f(width / 2.f - this->title_lable.getGlobalBounds().width / 2.f, 0.f));
     }
 
     void Title_bar::draw(sf::RenderTarget &target, sf::RenderStates states) const
     {
         target.draw(this->title_bar_background, states);
+        target.draw(this->title_lable, states);
         target.draw(this->minimize_button, states);
         target.draw(this->maximize_button, states);
         target.draw(this->exit_button, states);

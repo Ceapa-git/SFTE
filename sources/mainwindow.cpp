@@ -41,7 +41,7 @@ static void ucharp_from_int(unsigned char *ucharp, int val)
 namespace sfte
 {
     Main_window::Main_window(unsigned int width, unsigned int height, std::string title)
-        : title_bar(title, width, 20.f)
+        : title_bar(width, 20.f)
     {
         bool file_succes = this->try_from_file();
         if (!file_succes)
@@ -62,6 +62,7 @@ namespace sfte
         }
 
         this->title_bar.resize(this->size.x);
+        this->title_bar.set_title(this->title);
     }
     bool Main_window::try_from_file()
     {
@@ -227,7 +228,7 @@ namespace sfte
     }
     void Main_window::mouse_resize_window(sf::Event &event)
     {
-        static const sf::Rect<int> min_window(INT_MIN, INT_MIN, 400, 200);
+        static const sf::Rect<int> min_window(INT_MIN, INT_MIN, 800, 600);
         static const sf::Rect<int> max_window(INT_MAX, INT_MAX, INT_MAX, INT_MAX);
         auto get_between = [](int v_min, int v_max, int val)
         {

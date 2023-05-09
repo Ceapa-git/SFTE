@@ -19,9 +19,10 @@ namespace sfte
         Title_bar() = delete;
         Title_bar(const Title_bar &) = delete;
         Title_bar &operator=(const Title_bar &) = delete;
-        Title_bar(const std::string &title, float width, float title_bar_height);
+        Title_bar(float width, float title_bar_height);
         ~Title_bar() {}
 
+        void set_title(const std::string &title);
         void resize(float width);
 
         void press_button_mouse_over(sf::RenderWindow &window);
@@ -38,6 +39,9 @@ namespace sfte
         sfte::Button maximize_button;
         sfte::Button minimize_button;
         sf::RectangleShape title_bar_background;
+        sf::Font font;
+        sf::Text title_lable;
+        unsigned int padding = 3;
     };
 }
 
