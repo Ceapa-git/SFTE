@@ -1,5 +1,5 @@
-#ifndef __PCH__SFML__H__
-#define __PCH__SFML__H__
+#ifndef SFTE_PCHSFML_H_INCLUDED
+#define SFTE_PCHSFML_H_INCLUDED
 
 #include <SFML/Audio.hpp>
 #include <SFML/Config.hpp>
@@ -11,4 +11,4 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
-#endif //__PCH__SFML__H__
+#endif // SFTE_PCHSFML_H_INCLUDED

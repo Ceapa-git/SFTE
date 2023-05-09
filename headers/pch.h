@@ -1,5 +1,5 @@
-#ifndef __PCH__H__
-#define __PCH__H__
+#ifndef SFTE_PCH_H_INCLUDED
+#define SFTE_PCH_H_INCLUDED
 
 #include <filesystem>
 #include <chrono>
@@ -30,4 +30,4 @@
 #include <future>
 #include <condition_variable>
 
-#endif //__PCH__H__
+#endif // SFTE_PCH_H_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef __BUTTTON__H__
-#define __BUTTTON__H__
+#ifndef SFTE_BUTTON_H_INCLUDED
+#define SFTE_BUTTON_H_INCLUDED
 
 #include "pch.h"
 #include "pchSFML.h"
@@ -29,4 +29,4 @@ namespace sfte
 
 }
 
-#endif //__BUTTTON__H__
+#endif // SFTE_BUTTON_H_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef __MAINWINDOW__H__
-#define __MAINWINDOW__H__
+#ifndef SFTE_MAINWINDOW_H_INCLUDED
+#define SFTE_MAINWINDOW_H_INCLUDED
 
 #include "pch.h"
 #include "pchSFML.h"
@@ -70,4 +70,4 @@ namespace sfte
     };
 }
 
-#endif //__MAINWINDOW__H__
+#endif // SFTE_MAINWINDOW_H_INCLUDED

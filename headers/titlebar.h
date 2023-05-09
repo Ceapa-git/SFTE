@@ -1,5 +1,5 @@
-#ifndef __TITLEBAR__H__
-#define __TITLEBAR__H__
+#ifndef SFTE_TITLEBAR_H_INCLUDED
+#define SFTE_TITLEBAR_H_INCLUDED
 
 #include "pch.h"
 #include "pchSFML.h"
@@ -45,4 +45,4 @@ namespace sfte
     };
 }
 
-#endif //__TITLEBAR__H__
+#endif // SFTE_TITLEBAR_H_INCLUDED
