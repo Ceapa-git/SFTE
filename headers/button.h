@@ -21,7 +21,7 @@ namespace sfte
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    private:
+    protected:
         sf::Texture texture;
         sf::Sprite sprite;
         bool pressed;

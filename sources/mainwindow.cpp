@@ -58,8 +58,10 @@ namespace sfte
             this->size_maximized = sf::Vector2u(1920, 1032);
             this->position_maximized = sf::Vector2i(0, 0);
 
-            this->window_state = WINDOW_NORMAL;
+            this->window_state = WINDOW_STATE_NORMAL;
         }
+
+        this->panels.push_back(Panel({30.f, 30.f}, {100.f, 200.f}, sf::Color(255, 100, 30)));
 
         this->title_bar.resize(this->size.x);
         this->title_bar.set_title(this->title);
@@ -235,7 +237,7 @@ namespace sfte
             return std::min<int>(v_max, std::max<int>(v_min, val));
         };
 
-        if (this->window_state == WINDOW_MAXIMIZED || this->moving ||
+        if (this->window_state == WINDOW_STATE_MAXIMIZED || this->moving ||
             this->title_bar.is_mouse_over(this->window) > TITLE_BAR)
         {
             if (this->can_resize)
@@ -374,7 +376,7 @@ namespace sfte
     }
     void Main_window::mouse_move_window(sf::Event &event)
     {
-        if (this->window_state == WINDOW_MAXIMIZED || this->can_resize || this->resizing ||
+        if (this->window_state == WINDOW_STATE_MAXIMIZED || this->can_resize || this->resizing ||
             this->title_bar.is_mouse_over(this->window) > TITLE_BAR)
         {
             this->can_move = false;
@@ -408,8 +410,8 @@ namespace sfte
     {
         this->window.clear();
         this->window.draw(this->title_bar);
-        for (sf::Drawable *&drawable : this->panels)
-            this->window.draw(*drawable);
+        for (Panel &panel : this->panels)
+            this->window.draw(panel);
         this->window.display();
     }
 
@@ -417,21 +419,21 @@ namespace sfte
     {
         if (state == this->window_state)
             return;
-        if (state == WINDOW_NORMAL || (this->window_state == WINDOW_MAXIMIZED && state == WINDOW_SWAP_STATE))
+        if (state == WINDOW_STATE_NORMAL || (this->window_state == WINDOW_STATE_MAXIMIZED && state == WINDOW_STATE_SWAP))
         {
             this->size_maximized = this->window.getSize();
             this->position_maximized = this->window.getPosition();
             this->window.setSize(this->size_normal);
             this->window.setPosition(this->position_normal);
-            this->window_state = WINDOW_NORMAL;
+            this->window_state = WINDOW_STATE_NORMAL;
         }
-        else if (state == WINDOW_MAXIMIZED || (this->window_state == WINDOW_NORMAL && state == WINDOW_SWAP_STATE))
+        else if (state == WINDOW_STATE_MAXIMIZED || (this->window_state == WINDOW_STATE_NORMAL && state == WINDOW_STATE_SWAP))
         {
             this->size_normal = this->window.getSize();
             this->position_normal = this->window.getPosition();
             this->window.setSize(this->size_maximized);
             this->window.setPosition(this->position_maximized);
-            this->window_state = WINDOW_MAXIMIZED;
+            this->window_state = WINDOW_STATE_MAXIMIZED;
         }
 
         this->size = this->window.getSize();

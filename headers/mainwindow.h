@@ -7,10 +7,11 @@
 #include <datafile.h>
 #include "button.h"
 #include "titlebar.h"
+#include "panel.h"
 
-#define WINDOW_NORMAL (0)
-#define WINDOW_MAXIMIZED (1)
-#define WINDOW_SWAP_STATE (2)
+#define WINDOW_STATE_NORMAL (0)
+#define WINDOW_STATE_MAXIMIZED (1)
+#define WINDOW_STATE_SWAP (2)
 
 namespace sfte
 {
@@ -29,7 +30,7 @@ namespace sfte
 
         void display();
 
-        void set_state(int state = WINDOW_SWAP_STATE);
+        void set_state(int state = WINDOW_STATE_SWAP);
 
     private:
         sf::RenderWindow window;
@@ -45,10 +46,10 @@ namespace sfte
         sf::Vector2u size_maximized;
         sf::Vector2i position_maximized;
 
-        sfte::Title_bar title_bar;
+        Title_bar title_bar;
 
         // TODO: way to remember smallerwindow details
-        std::vector<sf::Drawable *> panels; // * temporary name
+        std::vector<Panel> panels; // * temporary name
 
         int window_state;
 

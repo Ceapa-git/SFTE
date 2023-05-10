@@ -32,7 +32,7 @@ namespace sfte
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    private:
+    protected:
         std::string title;
         float title_bar_height;
         sfte::Button exit_button;
